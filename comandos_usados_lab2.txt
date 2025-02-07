@@ -1,0 +1,94 @@
+Comandos usados práctica 1:
+_______________________________________________________________
+
+1.	Actualize los repositorios del sistema (update & Upgrade) y Enumere los repositorios actualmente en uso en su servidor.
+
+
+
+Actualizar los paquetes de los repositorios en Linux (con -y que es el parámetro para responder a las preguntas que haga el sistema durante la instalación de los paquetes):
+sudo apt update -y
+
+Instalar actualizaciones de paquetes ya instalados (con -y que es el parámetro para responder a las preguntas que haga el sistema durante la instalación de los paquetes):
+sudo apt upgrade -y 
+
+Hacer ambas:
+sudo apt update && sudo apt upgrade -y
+
+Enumerar la lista de repositorios en uso en el servidor
+grep -rhE ^deb /etc/apt/sources.list /etc/apt/sources.list.d/
+
+grep es un comando que busca patrones de texto dentro de un archivo
+-r Busca dentro de un archivo especificado y en todos los archivos dentro del directorio
+-h Oculta el nombre de archivo de donde se encontró la coincidencia
+-E Permite usar expresiones regulares avanzadas.
+^deb busca las lineas que coincidan con deb al principio, esto indica un repositorio
+
+ 
+/etc/apt/sources.list Archivo principal de repositories en Debian/Ubuntu.
+/etc/apt/sources.list.d/ Carpeta donde se almacenan respositorios adicionales en archivos separados.
+
+2.	Proceda a buscar la herramienta en el cache de los repositorios a ver si se encuentra disponible.
+Buscar la herramienta en el caché del respositorio
+apt-cache search bashtop
+
+Si la herramienta no aparece disponible entonces se procede al paso 3 para instalar.
+
+3.	Instale la herramienta "Bashtop Resource Monitor" en caso de ser necesario, agregarla al repositorio local (https://es.linux-console.net/?p=438#gsc.tab=0)
+Antes de proceder a instalar bashtop se necesitan los siguientes archivos:
+•	Git
+•	GNU Coreutils
+•	Herramienta de línea de comandos GNU sed, awk, grep y ps
+•	Sensores Lm – Opcionales – (Para recopilar estadísticas de temperatura de la CPU)
+
+Instalar todos:
+sudo apt install git -y
+sudo apt install coreutils -y
+sudo apt install sed gawk grep procps -y
+sudo apt install lm-sensors -y
+
+
+Clonar el repositorio git e instalar bashtop:
+git clone https://github.com/aristocratos/bashtop.git
+cd bashtop
+sudo make install (Para utilizar este comando se debe instalar con “sudo apt install make”)
+
+
+4.	Una vez haya presentado la herramienta anterior, proceda a desinstalarla, eliminando también todos los archivos de configuración.
+Para desinstalar Bashtop:
+sudo make uninstall
+
+5.	Elimine todas las dependencias asociadas a este programa que ya no esten en uso
+Para ello utilizamos el siguiente comando:
+sudo make uninstall (para eliminar bashtop)
+cd ../ para volver al escritorio
+rm -rf bashtop para eliminar la carpeta con bashtop
+
+
+ 
+Comandos usados práctica 2:
+_________________________________
+
+1.	Crear un trabajo con cron para actualizar el sistema todos los días a las 11 pm:
+crontab -e
+
+Agrega la siguiente línea al final del archivo:
+0 23 * * * apt update && apt upgrade -y
+
+2.	Programar un reinicio todos los domingos a las 3 a.m:
+Modificar el archivo de crontab y agregar esta línea:
+0 3 * * 0 /sbin/shutdown -r now
+
+3.	Crear una tarea programada con at para eliminar el contenido de /tmp dentro de 1 minuto:
+
+Programar la tarea con at utilizando:
+at now + 1 minute
+at> rm -rf /tmp/* 
+Luego presionar Ctrl + D
+
+Para verificar la tarea programada utilizar 
+atq
+
+
+
+
+
