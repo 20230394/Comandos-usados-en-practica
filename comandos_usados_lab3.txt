@@ -1,0 +1,146 @@
+Laboratorio 3 comandos utilizados:
+
+Práctica 1 comandos utilizados
+__________________________________________________
+
+1.	Configure el menú de GRUB para que el tiempo de espera en el que muestra el menú sea de 20 segundos (Mostrar el resultado)
+Abrir la terminal y editar el archivo de grub con nano:
+sudo nano /etc/default/grub
+
+Buscar la línea que comienza con GRUB_TIMEOUT= y cambiar el valor a 20:
+GRUB_TIMEOUT=20
+
+Guardar los cambios en nano.
+
+Aplicar los cambios actualizando GRUB:
+sudo update-grub
+
+Reiniciar el sistema y verificar que el menú GRUB dura 20 segundos en iniciar.
+sudo reboot
+
+2.	Recuperar la contraseña del usuario root
+Reiniciar el sistema y en el menú de grub pulsamos e.
+
+Buscar la línea que comienza con Linux y agregar init=/bin/bash al final de la línea. Luego se pulsa F10 para concluir con la configuración y entrar a la línea de comandos.
+
+Para montar el sistema de ficheros en modo escritura, ejecutamos el comando mount -o remount rw /
+
+El siguiente paso, será modificar el fichero shadow, con nano /etc/shadow
+
+Una vez dentro, buscaremos la línea donde se encuentra el usuario al que queremos resetear la contraseña, en este caso el usuario debian y borraremos las letras, número y caracteres que se encuentran entre los puntos dobles:
+
+Luego de haber configurado todo guardamos los cambios, cerramos el fichero y ejecutamos passwd nombre_de_usuario.
+
+
+
+
+
+
+
+ 
+Práctica 2 comandos utilizados
+_____________________________________________________
+
+1.	Crear un script que haga un backup creando un comprimido utilizando TAR de la carpeta /home/(tu_usuario). el nombre del archivo debe de tener la fecha y la hora actual en formato dd-mm-yyyy:hh:mm:
+
+Para ello creamos el siguiente script para ejecutar la tarea requerida
+
+Creamos y abrimos el archivo con nano:
+nano script_backup.sh
+
+Luego de ello procedemos a incluir la siguiente línea de comandos para crear el script.
+
+#!/bin/bash
+
+# Definir variables
+USER_HOME="/home/$USER" # Directorio que especifica el directorio de usuario
+BACKUP_DIR="/home/$USER/backups"  # Directorio donde guardar el backup
+TIMESTAMP=$(date +"%d-%m-%Y:%H:%M") # Este es el formato para mostrar la fecha requerida como en el mandato
+BACKUP_FILE="$BACKUP_DIR/backup_$TIMESTAMP.tar.gz" # Archivo de Backup
+
+# Crear directorio de backups si no existe
+mkdir -p "$BACKUP_DIR"
+
+# Crear el backup con tar
+tar -czvf "$BACKUP_FILE" "$USER_HOME"
+
+# Mostrar mensaje de éxito
+echo "Backup creado: $BACKUP_FILE"
+
+Luego de ello cedemos permiso de ejecución para el archivo:
+chmod +x script_backup.sh
+
+Y para finalizar ejecutar el script mencionándolo por su nombre con un ./
+./script_backup
+ 
+2.	Crear un script que copie el resultado del comando ifconfig en un archivo en el escritorio. El script debe de preguntar cual nombre desea ponerle al archivo y crear el archivo con el nombre provisto
+Si no se tiene el ifconfig entonces se procede a instalar para usarlo
+sudo apt install net-tools -y
+
+Creamos nuestro script para la salida de ifconfig en un archivo en el escritorio
+
+nano ifconfig_file.sh
+
+
+Y pegar esta línea de comando
+#!/bin/bash
+
+# Pedir nombre del archivo al usuario
+read -p "Ingrese el nombre del archivo (sin extensión): " FILE_NAME
+
+# Ruta del archivo en el escritorio
+FILE_PATH="$HOME/Desktop /$FILE_NAME.txt"
+
+# Guardar salida de ifconfig en el archivo
+ifconfig > "$FILE_PATH"
+
+# Mostrar mensaje de éxito
+echo "La información de red se guardó en: $FILE_PATH"
+
+
+
+Luego de ello cedemos permiso de ejecución para el archivo:
+chmod +x ifconfig_file.sh
+
+Correr el código utilizando el nombre del script iniciando con ./
+./ifconfig_file.sh
+
+
+Podemos comprobar que el script se ha iniciado de una manera exitosa moviéndonos al Desktop y luego haciendo un cat al archivo que creo el script con el nombre que le pedimos.
+
+
+
+
+
+
+
+
+Práctica 3 comandos utilizados
+_____________________________________________________
+
+1.	Configure su VM server en modo Bridge y valide que desde su maquina host de windows pueda alcanzarla via ping
+Para ello vamos a las preferencias de la máquina y ponemos el adaptador en modo Bridge. Luego de eso en este despliega el comando ifconfig o ip a para ver si nuestra máquina está dentro del rango de red de la máquina de nuestro Windows (para comprobar revisar también la red de nuestro adaptador principal).
+Luego de eso se puede comprobar un ping de una máquina a otra para comprobar la validez nuevamente.
+
+2.	Habilite el servicio de ssh y pruebe conectandose desde su maquina host utilizando su usuario y contraseña
+Para ello actualizamos repositorios e instalamos SSH
+
+sudo apt-get update
+sudo apt-get install openssh-server
+
+Comprobamos si esta funcionando el servicio
+sudo systemctl status ssh
+
+3.	En su maquina Host (windows) genere un par de llaves (publica-privada) especifique el destino donde se guardaran las llaves y en la parte de paraphase, dejarlo en blanco.
+
+Usar el siguiente comando para generar las llaves rsa:
+ssh-keygen
+
+Luego dar enter a las demás opciones y buscar en el directorio que se creo la llave rsa con el bloc de notas para copiar esta.
+
+Pegar la llave rsa en la carpeta de .ssh y authorized keys. Si esta no está utilizamos el siguiente comando para crearla.
+echo "TU_CLAVE_PUBLICA" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+
+
+Luego de eso ejecutamos el comando en ssh en la terminal para entrar remotamente sin necesidad para ello introducimos nuestro usuario y la IP asignada.
