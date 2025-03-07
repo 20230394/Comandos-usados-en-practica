@@ -1,0 +1,61 @@
+Comandos usados Práctica 1 – Sincronización de carpetas con Rsync
+______________________________________________________________________________
+
+•	Crear una carpeta en su servidor primario y dentro crear 100 archivos (con el comando touch)
+1.	Crear la carpeta y los archivos en el servidor primario
+mkdir -p ~/sync_folder
+cd ~/sync_folder
+touch archivo{1..100}.txt
+
+# Listar los archivos en orden numérico
+ls -v
+2.	Instalar Rsync en ambos servidores (si no lo tienes ya instalado)
+sudo apt update && sudo apt install rsync -y
+
+
+3.	Copiar los archivos al servidor remoto con Rsync
+rsync -avz ~/sync_folder gabriel@10.0.0.31:/home/gabriel/ 
+
+
+# Para ver la IP de cada máquina se utiliza ifconfig y así hacer la configuración del SSH
+# Instalación de ifconfig
+sudo apt update
+sudo apt install net-tools
+
+# Configuración de SSH para autenticación sin contraseña
+# En el servidor primario
+ssh-keygen
+
+ssh-copy-id gabriel@10.0.0.31
+# Colocar contraseña del servidor secundario y ya debería funcionar sin la contraseña
+
+# Explicación de los flags:
+•	-a: Modo archivo (preserva permisos, timestamps, etc.).
+•	-v: Modo verbose (para ver el progreso).
+•	-z: Comprime los datos durante la transferencia.
+
+4.	Crear el script de sincronización
+nano ~/sync_script.sh
+
+# Dentro del archivo
+
+rsync -avz ~/sync_folder gabriel@10.0.0.31:/home/gabriel/
+
+
+Conceder los permisos de ejecución
+chmod +x ~/sync_script.sh
+
+5.	Agregar el script al crontab para ejecutarse cada 1 minuto
+# editar crontab
+crontab -e
+
+# editar en el archivo de crontab
+* * * * * /home/gabriel/sync_script.sh
+
+
+6.	Comprobar que el crontab está funcionando
+# Crear un archive dentro del servidor primario
+touch ~/sync_folder/test_sync.txt
+
+# Esperar un minute y revisar en el servidor remoto
+ls /home/usuario/sync_folder
