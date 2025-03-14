@@ -1,0 +1,41 @@
+Comandos usados Práctica 1 – Cifrado
+_________________________________________
+1.	Instalar GPG2
+sudo apt update && sudo apt install -y gnupg2
+
+2.	Verificar la instalación de gpg
+gpg --version
+
+
+
+3.	Crear un Directorio y archivo
+mkdir cifrado_practica && cd cifrado_practica
+
+4.	Crear archivo de texto
+echo “Este es un archivo de prueba para cifrado con GPG2” > mensaje.txt
+
+5.	Generar una clave GPG
+gpg --full-generate-key
+
+Configurar las siguientes opciones en la clave:
+Tipo RSA
+Tamaño 2048
+Expiración 0 (no vence)
+Nombre, correo y comentario
+Confirmar con O
+Introducir el passphrase
+
+6.	Verificar que la clave se creó
+gpg --list-keys
+
+7.	Cifrar el archivo mensaje.txt
+gpg -r “Gabriel” -o mensaje.txt.gpg -e mensaje.txt
+
+8.	Intentar acceder al archivo cifrado
+cat mensaje.txt.gpg
+
+9.	Descifrar el archivo
+gpg -o mensaje.descifrado.txt -d mensaje.txt.gpg
+
+	Verificar contenido
+	cat mensaje_descifrado.txt 
