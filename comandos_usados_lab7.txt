@@ -1,0 +1,138 @@
+Comandos utilizados práctica 1
+======================================
+1.	Actualizar e instalar el servidor NFS:
+sudo apt update
+sudo apt install nfs-kernel-server -y
+
+2.	Crear el directorio compartido y generar los archivos
+sudo mkdir ~/OS3
+cd ~/OS3
+sudo touch Adrian{1..100}.txt
+
+
+#Verificar la creación de los 100 archivos
+ls -v
+
+3.	Asignar permisos a la carpeta
+sudo chmod 777 ~/OS3
+
+4.	Configuración de exports para definir que directorios y con que permisos serán compartidos.
+#Editar nano de exports
+sudo nano /etc/exports
+
+
+#Añadir la siguiente línea
+/home/gabriel/OS3    *(rw,sync,no_subtree_check)
+
+
+Ctrl-O y Ctrl-Y
+
+
+#Aplicar configuración y reiniciar servicio de NFS
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server 
+
+
+5.	Instalar el cliente NFS en la máquina cliente
+sudo apt update
+sudo apt install nfs-common -y
+
+#Montar el Directorio compartido
+mkdir ~/nfs_OS3
+sudo mount 10.0.0.31:/home/gabriel/OS3 ~/nfs_OS3
+
+#Verificar que los archivos se han pasado exitosamente
+ls -v ~/nfs_OS3
+7. Configurar el montaje automático
+sudo nano /etc/fstab
+
+#Añadir esta línea al final
+10.0.0.31:/home/gabriel/OS3   /home/kali/nfs_OS3    nfs    defaults    0    0
+
+#Guardar y probar desmontando y montando de nuevo
+sudo umount ~/nfs_OS3
+sudo mount -a
+
+#Probar el reinicio
+sudo reboot now
+
+
+#Luego del reinicio, verificar que sigue el archivo montado
+
+ls ~/nfs_OS3
+
+#Probar con crear un archivo nuevo
+touch hola.txt (Maquina server)
+ls ~/nfs_OS3 (Maquina cliente)
+
+
+
+
+Comandos utilizados práctica 2
+======================================
+
+1.	Instalación de SAMBA y habilitación del servicio
+#Instalación y habilitación del servicio de Samba
+sudo apt update
+sudo apt install samba -y
+sudo systemctl enable –-now smbd
+sudo systemctl status smbd
+
+2.	Creación de carpeta compartida, usuarios y permisos
+#Crear carpeta compartida
+sudo mkdir -p /srv/samba/compartida
+
+#Crear un grupo para los usuarios de Samba
+sudo groupadd sambashare #Normalmente ya existe
+
+#Crear usuario “adrian” y agregarlo al grupo:
+sudo useradd -M -s /sbin/nologin adrian -G sambashare
+sudo smbpasswd -a adrian # pedirá una contraseña
+sudo smbpasswd -e adrian # Habilitar usuario en Samba
+
+#Asignar permisos a la carpeta compartida
+sudo chown -R adrian:sambashare /srv/samba/compartida
+sudo chmod -R 2770 /srv/samba/compartida 
+
+3.	Configuración de Samba
+#Entrar a configuración
+sudo nano /etc/samba/smb.conf
+
+#Añadir la siguiente línea
+[Compartida]
+   path = /srv/samba/compartida
+   browseable = yes
+   writable = yes
+   valid users = @sambashare
+   create mask = 0660
+   directory mask = 0770
+   force group = sambashare
+
+#Reiniciar Samba y aplica cambios
+sudo systemctl restart smbd
+
+
+
+
+4.	Crear 100 archivos en la carpeta compartida
+cd /srv/samba/compartida 
+#Se debe entrar con root a este directorio ya que nuestro usuario normal no tiene permisos
+
+touch adrian{1..100}
+
+#Comprobar la creación de los 100 archivos
+ls
+
+
+5.	Mapear la carpeta en Windows
+•	Entrar al explorador y en este equipo hacer click derecho y seleccionar conectar a unidad de red
+•	En el campo de carpeta, ingresar la dirección del servidor Samba (\\10.0.0.31\compartida)
+•	Marcar conectar usando credenciales diferentes, ingresar el usuario y contraseña de Samba
+•	Finalizar
+
+6.	Editar el archivo adrian99 en Windows
+•	Buscar el archivo adrian99.txt y abrir con el bloc de notas
+•	Escribir “el zumzum de la carabela” guardar y cerrar el archivo
+
+7.	Validar la modificación desde Linux
+cat /srv/samba/compartida/adrian99.txt
